@@ -20,14 +20,13 @@ class NestedSetHelper
     /**
      * @param array $array
      * @param array $tree
-     * @param int $lft
      * @return array
      */
-    public static function convertArrayToNestedSetBranch($array, $tree, $lft = 1)
+    public static function convertArrayToNestedSetBranch($array, $tree)
     {
         foreach ($array as $node) {
             if (empty($tree)) {
-                $tree[] = self::convertArrayToNestedSetNode($node, $lft);
+                $tree[] = self::convertArrayToNestedSetNode($node, 1);
                 continue;
             }
             $tree = self::append($tree, $node);
@@ -35,14 +34,10 @@ class NestedSetHelper
         return $tree;
     }
 
-    public static function convertArrayToNestedSet($array, $lft)
+    public static function convertArrayToNestedSet($array)
     {
-        $nodes = self::splitNodes($array);
         $tree = [];
-        foreach ($nodes as $node) {
-            $tree = self::convertArrayToNestedSetBranch($node, $tree, $lft);
-            $lft = $tree[0]['rgt'] + 1;
-        }
+        $tree = self::convertArrayToNestedSetBranch($array, []);
         return $tree;
     }
 
@@ -59,48 +54,6 @@ class NestedSetHelper
     }
 
     /**
-     * @param array $array
-     * @return array
-     */
-    private static function splitNodes($array)
-    {
-        $lastDepth = 0;
-        $nodes = [];
-        $fencing = 0;
-        foreach ($array as $node) {
-            if ($lastDepth == 0) {
-                $lastDepth = $node['depth'];
-                $nodes[$fencing][] = $node;
-                continue;
-            }
-            if ($lastDepth < $node['depth']) {
-                $nodes[$fencing][] = $node;
-                continue;
-            }
-            $fencing += 1;
-            $nodes[$fencing][] = $node;
-        }
-        return $nodes;
-
-
-//        foreach ($array as $node) {
-//            if ($lastDepth == 0) {
-//                $lastDepth = $node['depth'];
-//                $nodes[$fencing][] = $node;
-//                continue;
-//            }
-//            if ($lastDepth != $node['depth']) {
-//                $fencing += 1;
-//                $nodes[$fencing][] = $node;
-//                $lastDepth = $node['depth'];
-//                continue;
-//            }
-//            $nodes[$fencing][] = $node;
-//        }
-//        return $nodes;
-    }
-
-    /**
      * @param array $tree
      * @param array $node
      * @return array
@@ -109,7 +62,7 @@ class NestedSetHelper
     {
         $lastNode = count($tree) - 1;
         $nodeRgt = 0;
-        for ($i = $lastNode; $i > 0; $i--) {
+        for ($i = $lastNode; $i > -1; $i--) {
             if ($tree[$i]['depth'] == $node['depth']) {
                 $nodeRgt = $tree[$i]['rgt'] + 1;
                 break;
