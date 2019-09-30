@@ -13,8 +13,7 @@ class NestedSetHelper
     public static function convertArrayToNestedSetNode($array, $lft)
     {
         $array['lft'] = $lft;
-        $lft += 1;
-        $array['rgt'] = $lft;
+        $array['rgt'] = $lft + 1;
         return $array;
     }
 
@@ -43,12 +42,11 @@ class NestedSetHelper
      */
     public static function convertArrayToNestedSet($array)
     {
-        $tree = [];
+        $firstNode = $array[0];
+        unset($array[0]);
+        $tree[] = self::convertArrayToNestedSetNode($firstNode, 1);
+
         foreach ($array as $node) {
-            if (empty($tree)) {
-                $tree[] = self::convertArrayToNestedSetNode($node, 1);
-                continue;
-            }
             $tree = self::append($tree, $node);
         }
         return $tree;
