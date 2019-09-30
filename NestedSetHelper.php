@@ -19,11 +19,11 @@ class NestedSetHelper
 
     /**
      * @param array $array
-     * @param array $tree
      * @return array
      */
-    public static function convertArrayToNestedSetBranch($array, $tree)
+    public static function convertArrayToNestedSet($array)
     {
+        $tree = [];
         foreach ($array as $node) {
             if (empty($tree)) {
                 $tree[] = self::convertArrayToNestedSetNode($node, 1);
@@ -34,13 +34,11 @@ class NestedSetHelper
         return $tree;
     }
 
-    public static function convertArrayToNestedSet($array)
-    {
-        $tree = [];
-        $tree = self::convertArrayToNestedSetBranch($array, []);
-        return $tree;
-    }
-
+    /**
+     * @param array $tree
+     * @param array $node
+     * @return array
+     */
     public static function append($tree, $node)
     {
         $lastNode = count($tree) - 1;
@@ -68,31 +66,41 @@ class NestedSetHelper
                 break;
             }
         }
-        for ($j = $lastNode; $j > -1; $j--) {
-            if ($tree[$j]['rgt'] >= $nodeRgt) {
-                $tree[$j]['rgt'] += 2;
-            }
-            if ($tree[$j]['lft'] >= $nodeRgt) {
-                $tree[$j]['lft'] += 2;
-            }
-        }
+
+        self::moveNodes($tree, $lastNode, $nodeRgt);
         $tree[] = self::convertArrayToNestedSetNode($node, $nodeRgt);
         return $tree;
     }
 
+    /**
+     * @param array $tree
+     * @param array $node
+     * @return array
+     */
     private static function appendChild($tree, $node)
     {
         $lastNode = count($tree) - 1;
         $nodeRgt = $tree[$lastNode]['rgt'];
-        for ($j = $lastNode; $j > -1; $j--) {
-            if ($tree[$j]['rgt'] >= $nodeRgt) {
-                $tree[$j]['rgt'] += 2;
-            }
-            if ($tree[$j]['lft'] >= $nodeRgt) {
-                $tree[$j]['lft'] += 2;
-            }
-        }
+
+        self::moveNodes($tree, $lastNode, $nodeRgt);
         $tree[] = self::convertArrayToNestedSetNode($node, $nodeRgt);
         return $tree;
+    }
+
+    /**
+     * @param array $nestedSetArray
+     * @param int $lastNode
+     * @param int $condition
+     */
+    private static function moveNodes(&$nestedSetArray, $lastNode, $condition)
+    {
+        for ($j = $lastNode; $j > -1; $j--) {
+            if ($nestedSetArray[$j]['rgt'] >= $condition) {
+                $nestedSetArray[$j]['rgt'] += 2;
+            }
+            if ($nestedSetArray[$j]['lft'] >= $condition) {
+                $nestedSetArray[$j]['lft'] += 2;
+            }
+        }
     }
 }
